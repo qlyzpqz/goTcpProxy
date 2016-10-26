@@ -43,7 +43,11 @@ func main() {
 	}
 
 	// init logger server
-	initLogger()
+	err := initLogger()
+	if err != nil {
+		fmt.Println("init logger failed,", err)
+		return
+	}
 
 	// init Backend server
 	initBackendSvrs(pConfig.Backend)

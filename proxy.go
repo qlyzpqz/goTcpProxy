@@ -5,6 +5,8 @@ package main
 import (
 	"net"
 	"time"
+	//"fmt"
+	"io"
 )
 
 func initProxy() {
@@ -89,15 +91,21 @@ func pass(from net.Conn, to net.Conn, complete chan bool, oneSide chan bool, oth
 
 			from.SetReadDeadline(time.Now().Add(time.Duration(pConfig.Timeout) * time.Second))
 			read, err = from.Read(bytes)
+			//fmt.Println("read data from:", from.(*net.TCPConn).RemoteAddr())
 			if err != nil {
+				//fmt.Println("read data from:", from.(*net.TCPConn).RemoteAddr(), "failed", err)
 				complete <- true
-				oneSide <- true
+				if err != io.EOF {
+					oneSide <- true
+				}
 				return
 			}
 
 			to.SetWriteDeadline(time.Now().Add(time.Duration(pConfig.Timeout) * time.Second))
 			_, err = to.Write(bytes[:read])
+			//fmt.Println("write data to:", to.(*net.TCPConn).RemoteAddr())
 			if err != nil {
+				//fmt.Println("write data to:", to.(*net.TCPConn).RemoteAddr(), "failed", err)
 				complete <- true
 				oneSide <- true
 				return
